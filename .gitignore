@@ -1,0 +1,28 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+.Python
+build/
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+*.cover
+.pytest_cache/
+.cache
+
+# VS Code / PyCharm
+.vscode/
+.idea/
+
+# Environment files
+.env
+venv/
+ENV/
+env/
+venv.bak/
