@@ -72,10 +72,10 @@ Example:
 ## 🧰 Tech Stack
 
 - **Language:** Python 3.10+
-- **API:** [OpenAI API](https://platform.openai.com/)
+- **API:** [OpenRouter API](https://openrouter.ai/settings/keys)
 - **Libraries:** 
   - `openai` (API client)
-  - `requests` (optional)
+  - `requests` (testing)
   - `time` (for latency tracking)
   - `json` (output formatting)
 - **Prompt Engineering:** Implemented directly in the request payload
@@ -96,8 +96,10 @@ source venv/bin/activate  # Windows: venv\Scripts\activate
 # 3. Install dependencies
 pip install -r requirements.txt
 
-# 4. Set your OpenAI API key
-export OPENAI_API_KEY="your-api-key"  # or create a .env file using the .env.example file
+# 4. Set your API key, URL and model
+export OPENROUTER_API_KEY="your-api-key"  # or create a .env file using the .env.example file
+export OPENROUTER_BASE_URL="https://openrouter.ai/api/v1"
+export MODEL_NAME="google/gemini-2.0-flash-exp:free"
 ```
 
 ## 🧭 Usage
@@ -105,6 +107,7 @@ export OPENAI_API_KEY="your-api-key"  # or create a .env file using the .env.exa
 CLI Example
 ```sh
 python main.py "What is the capital of Spain?"
+# Optional use the jq formatter with | jq '.' 
 ```
 
 Expected Output:
@@ -118,6 +121,8 @@ Expected Output:
   }
 }
 ```
+
+Temperature and max tokens are fixed at 0.7 at 500 respectively in the code.
 
 ### Handling Adversarial Prompts
 
