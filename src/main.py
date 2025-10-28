@@ -40,6 +40,15 @@ class HenryBot:
         self.base_url = os.getenv(
             "OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
 
+        # Load configuration parameters from environment variables
+        # These can be customized in the .env file:
+        # - TEMPERATURE: Controls randomness (0.0-2.0, default: 0.7)
+        # - MAX_TOKENS: Maximum response length (default: 500)
+        # - PROMPTING_TECHNIQUE: "few_shot", "simple", or "chain_of_thought" (default: few_shot)
+        self.temperature = float(os.getenv("TEMPERATURE", "0.7"))
+        self.max_tokens = int(os.getenv("MAX_TOKENS", "500"))
+        self.default_prompting_technique = os.getenv("PROMPTING_TECHNIQUE", "few_shot")
+
         if not self.api_key:
             raise ValueError(
                 "OPENROUTER_API_KEY not found. Please set it in your environment or .env file.\n"
@@ -55,18 +64,21 @@ class HenryBot:
     def process_question(
         self,
         user_question: str,
-        prompt_technique: str = "few_shot"
+        prompt_technique: Optional[str] = None
     ) -> Dict:
         """
         Process a user question and return a structured JSON response.
 
         Args:
             user_question: The user's question
-            prompt_technique: Prompting technique to use (default: few_shot)
+            prompt_technique: Prompting technique to use (default: from env PROMPTING_TECHNIQUE)
 
         Returns:
             Dictionary containing the answer and metrics, or error message
         """
+        # Use default prompting technique from env if not specified
+        if prompt_technique is None:
+            prompt_technique = self.default_prompting_technique
         # Step 1: Check for adversarial prompts
         is_adversarial, adversarial_response = check_adversarial_prompt(
             user_question)
@@ -89,8 +101,8 @@ class HenryBot:
                 model=self.model,
                 messages=messages,
                 response_format={"type": "json_object"},
-                temperature=0.7,
-                max_tokens=500
+                temperature=self.temperature,
+                max_tokens=self.max_tokens
             )
 
             # Step 5: Stop metrics tracking
@@ -105,7 +117,7 @@ class HenryBot:
             )
 
             # Step 7: Parse the response
-            answer_text = response.choices[0].message.content.strip()
+            answer_text = response.choices[0].message.content
 
             # Try to parse as JSON
             try:

@@ -15,7 +15,6 @@ CSV files are stored in a 'logs' directory with the following structure:
 """
 
 import csv
-import os
 import threading
 from datetime import datetime
 from typing import Dict, Optional, Any
