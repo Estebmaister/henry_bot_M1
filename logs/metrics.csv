@@ -1,0 +1,13 @@
+timestamp,model,latency_ms,tokens_prompt,tokens_completion,tokens_total,cost_usd,prompt_technique,success
+2025-10-23T12:31:51.955505,google/gemini-2.0-flash-exp:free,1250,45,89,134,0.00268,few_shot,True
+2025-10-23T12:31:52.060713,openai/gpt-3.5-turbo,105,30,50,80,9e-05,chain_of_thought,True
+2025-10-23T12:31:52.061045,anthropic/claude-3-haiku,5000,25,0,25,0.00625,few_shot,False
+2025-10-23T12:33:15.049260,google/gemini-2.0-flash-exp:free,1250,45,89,134,0.00268,few_shot,True
+2025-10-23T12:33:15.150058,openai/gpt-3.5-turbo,101,30,50,80,9e-05,chain_of_thought,True
+2025-10-23T12:33:15.150330,anthropic/claude-3-haiku,5000,25,0,25,0.00625,few_shot,False
+2025-10-28T07:44:39.508451,google/gemini-2.0-flash-exp:free,4006,131,127,258,0.00039,few_shot,True
+2025-10-28T07:45:26.034179,,269,0,0,0,0.0,few_shot,False
+2025-10-28T08:41:14.694637,google/gemini-2.0-flash-exp:free,0,50,10,60,7e-05,few_shot,True
+2025-10-28T08:41:14.697545,google/gemini-2.0-flash-exp:free,0,0,0,0,0.0,few_shot,False
+2025-10-28T08:41:14.698876,google/gemini-2.0-flash-exp:free,0,40,20,60,8e-05,few_shot,True
+2025-10-28T08:41:14.699849,google/gemini-2.0-flash-exp:free,0,100,10,110,0.00012,few_shot,True
