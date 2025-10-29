@@ -100,6 +100,7 @@ pip install -r requirements.txt
 export OPENROUTER_API_KEY="your-api-key"  # or create a .env file using the .env.example file
 export OPENROUTER_BASE_URL="https://openrouter.ai/api/v1"
 export MODEL_NAME="google/gemini-2.0-flash-exp:free"
+
 ```
 
 ## 🧭 Usage
@@ -156,7 +157,7 @@ henry_bot_M1/
         │── safety.py             # Adversarial prompt detection
         └── system_prompt.txt
     └── metrics/                  # Token, cost, latency tracking
-    └── logging_mod/
+    └── logging_mod/              # Logging and CSV output
 └── logs/
 └── tests/
     ├── test_main.py
@@ -175,6 +176,47 @@ henry_bot_M1/
 [ ] Add streaming response support
 [ ] Integrate a web UI dashboard
 [ ] Expand adversarial prompt testing library
+
+---
+
+## 🛠️ Development Rules & Guidelines
+
+### Code Standards
+
+1. **Python Style**: Follow PEP 8 guidelines
+2. **Type Hints**: Use type hints for all function parameters and return values
+3. **Documentation**: Include docstrings for all classes and methods
+4. **Error Handling**: Implement proper exception handling with meaningful error messages
+5. **Testing**: Write unit tests for all new functionality
+
+### Project Structure
+
+1. **Modular Design**: Keep functionality separated into logical modules
+2. **Configuration**: Use environment variables for all configurable parameters
+3. **Logging**: Log all important events and errors to CSV files
+4. **Thread Safety**: Ensure thread-safe operations for concurrent access
+
+
+### API Design
+
+1. **JSON Responses**: Always return structured JSON responses
+2. **Error Codes**: Use consistent error response format
+3. **Metrics**: Include performance metrics in successful responses
+
+### Testing Requirements
+
+1. **Unit Tests**: Test all modules independently
+2. **Integration Tests**: Test complete workflows
+3. **Edge Cases**: Test error conditions and adversarial prompts
+4. **Performance**: Test with high request volumes
+
+### Security Considerations
+
+1. **Input Validation**: Validate all user inputs
+2. **Adversarial Detection**: Check for malicious prompts
+3. **Error Handling**: Don't expose sensitive information in errors
+
+---
 
 ## 👤 Author
 

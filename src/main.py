@@ -24,11 +24,15 @@ import traceback
 # Load environment variables from .env file
 load_dotenv()
 
+# Constants
+DEFAULT_MODEL = "google/gemini-2.0-flash-exp:free"
+DEFAULT_PROMPTING_TECHNIQUE = "few_shot"
+
 
 class HenryBot:
     """Main application class for Henry Bot."""
 
-    def __init__(self, model: str = "google/gemini-2.0-flash-exp:free"):
+    def __init__(self, model: str = DEFAULT_MODEL):
         """
         Initialize Henry Bot.
 
@@ -47,7 +51,8 @@ class HenryBot:
         # - PROMPTING_TECHNIQUE: "few_shot", "simple", or "chain_of_thought" (default: few_shot)
         self.temperature = float(os.getenv("TEMPERATURE", "0.7"))
         self.max_tokens = int(os.getenv("MAX_TOKENS", "500"))
-        self.default_prompting_technique = os.getenv("PROMPTING_TECHNIQUE", "few_shot")
+        self.default_prompting_technique = os.getenv(
+            "PROMPTING_TECHNIQUE", DEFAULT_PROMPTING_TECHNIQUE)
 
         if not self.api_key:
             raise ValueError(
@@ -79,6 +84,7 @@ class HenryBot:
         # Use default prompting technique from env if not specified
         if prompt_technique is None:
             prompt_technique = self.default_prompting_technique
+
         # Step 1: Check for adversarial prompts
         is_adversarial, adversarial_response = check_adversarial_prompt(
             user_question)
@@ -202,7 +208,7 @@ def main():
     # The model can be changed here if needed
     # Examples: "openai/gpt-4", "anthropic/claude-3-haiku", "meta-llama/llama-3-8b"
     # "openai/gpt-3.5-turbo"
-    model = os.getenv("MODEL_NAME", "google/gemini-2.0-flash-exp:free")
+    model = os.getenv("MODEL_NAME", DEFAULT_MODEL)
 
     try:
         bot = HenryBot(model=model)
