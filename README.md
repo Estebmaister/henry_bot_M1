@@ -8,6 +8,10 @@ The system integrates **prompt engineering techniques** to improve response qual
 > The application also includes adversarial prompt handling to stress-test model safety and robustness.
 
 ---
+## Report
+
+The report created for the application was divided in two. One to address the prompting strategy selection [here](./docs/PROMPTING_STRATEGY.md), and another to address the metrics and logging implementation for performance monitoring [here](./docs/LOGGING_AND_METRICS.md).
+
 ## 🚀 Features
 
 - **JSON-formatted responses** for easy downstream integration.

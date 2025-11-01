@@ -16,6 +16,7 @@ CSV files are stored in a 'logs' directory with the following structure:
 
 import csv
 import threading
+import re
 from datetime import datetime
 from typing import Dict, Optional, Any
 from pathlib import Path
@@ -33,6 +34,10 @@ class CSVLogger:
         """
         self.log_dir = Path(log_dir)
         self.lock = threading.Lock()
+
+        # Determine project root for path sanitization
+        # Navigate up from the logs directory to find project root
+        self.project_root = Path.cwd()
 
         # Create logs directory if it doesn't exist
         self.log_dir.mkdir(parents=True, exist_ok=True)
@@ -90,18 +95,57 @@ class CSVLogger:
                 ]
             )
 
+    def _sanitize_path(self, text: str) -> str:
+        """
+        Sanitize file paths in text to prevent exposing system information.
+        Converts absolute paths to relative paths from project root.
+
+        Args:
+            text: Text potentially containing file paths
+
+        Returns:
+            Text with absolute paths replaced by relative paths
+        """
+        # Get the absolute project root path as string
+        project_root_str = str(self.project_root)
+
+        # Pattern to match file paths in stack traces
+        # Matches quoted paths: File "/absolute/path/to/file.py", line X
+        path_pattern = r'File "([^"]+)"'
+
+        def replace_path(match):
+            abs_path = match.group(1)
+
+            # Check if path is in venv or external libraries first
+            if 'venv' in abs_path or 'site-packages' in abs_path or '/opt/' in abs_path or '/usr/' in abs_path:
+                # External library - anonymize it by default
+                pass
+            # If path starts with project root, make it relative
+            elif abs_path.startswith(project_root_str):
+                rel_path = abs_path[len(project_root_str):].lstrip('/')
+                return f'File "./{rel_path}"'
+            # Any other absolute path - anonymize it
+            filename = Path(abs_path).name
+            return f'File "<external>/{filename}"'
+
+        # Replace all file paths in the text
+        sanitized = re.sub(path_pattern, replace_path, text)
+        return sanitized
+
     def _sanitize_field(self, field: Any) -> str:
         """
-        Sanitize a field by converting to string and removing newlines.
+        Sanitize a field by converting to string, removing newlines, and sanitizing file paths.
 
         Args:
             field: The field value to sanitize
 
         Returns:
-            Sanitized string with newlines replaced by spaces
+            Sanitized string with newlines replaced by spaces and paths sanitized
         """
         # Convert to string
         field_str = str(field)
+        # Sanitize file paths to prevent exposing system information
+        field_str = self._sanitize_path(field_str)
         # Replace newlines with spaces
         field_str = field_str.replace('\n', ' ').replace('\r', ' ')
         # Remove excessive whitespace

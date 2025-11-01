@@ -414,3 +414,126 @@ def test_newline_stripping_metrics(logger, temp_log_dir):
     # Verify content is preserved
     assert "test-model with newline" == row["model"]
     assert "few_shot with newline" == row["prompt_technique"]
+
+
+def test_path_sanitization_project_files(logger, temp_log_dir):
+    """Test that file paths from project files are converted to relative paths."""
+    # Get the current project root
+    project_root = logger.project_root
+
+    # Create a stack trace with absolute paths from project
+    stack_trace = f"""Traceback (most recent call last):
+  File "{project_root}/src/main.py", line 84, in process_question
+    response = self.client.chat.completions.create(
+  File "{project_root}/src/prompting/safety.py", line 52, in detect
+    patterns.append(match)
+ValueError: Test error"""
+
+    # Log the error
+    logger.log_error(
+        error_type="ValueError",
+        error_message="Test error",
+        model="test-model",
+        user_question="Test question",
+        stack_trace=stack_trace
+    )
+
+    # Read the logged error
+    errors_file = Path(temp_log_dir) / "errors.csv"
+    with open(errors_file, 'r') as f:
+        reader = csv.DictReader(f)
+        rows = list(reader)
+
+    assert len(rows) == 1
+    row = rows[0]
+
+    # Verify paths are sanitized to relative paths
+    assert './src/main.py' in row["stack_trace"]
+    assert './src/prompting/safety.py' in row["stack_trace"]
+
+    # Verify absolute paths are not exposed
+    assert str(project_root) not in row["stack_trace"]
+    assert '/Users/' not in row["stack_trace"]
+
+
+def test_path_sanitization_external_files(logger, temp_log_dir):
+    """Test that file paths from external libraries are anonymized."""
+    # Create a stack trace with paths from venv and system libraries
+    stack_trace = """Traceback (most recent call last):
+  File "/Users/esteb/dev/maister/henry_bot_M1/venv/lib/python3.13/site-packages/openai/_base_client.py", line 1047, in request
+    raise self._make_status_error_from_response(err.response)
+  File "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/unittest/mock.py", line 1167, in __call__
+    return self._mock_call(*args, **kwargs)
+Exception: API Error"""
+
+    # Log the error
+    logger.log_error(
+        error_type="Exception",
+        error_message="API Error",
+        model="test-model",
+        user_question="Test question",
+        stack_trace=stack_trace
+    )
+
+    # Read the logged error
+    errors_file = Path(temp_log_dir) / "errors.csv"
+    with open(errors_file, 'r') as f:
+        reader = csv.DictReader(f)
+        rows = list(reader)
+
+    assert len(rows) == 1
+    row = rows[0]
+
+    # Verify external paths are anonymized
+    assert '<external>/_base_client.py' in row["stack_trace"]
+    assert '<external>/mock.py' in row["stack_trace"]
+
+    # Verify sensitive paths are not exposed
+    assert '/Users/esteb' not in row["stack_trace"]
+    assert '/opt/homebrew' not in row["stack_trace"]
+    assert 'venv/lib/python' not in row["stack_trace"]
+
+
+def test_path_sanitization_mixed_paths(logger, temp_log_dir):
+    """Test path sanitization with both project and external files."""
+    project_root = logger.project_root
+
+    # Create a stack trace with mixed paths
+    stack_trace = f"""Traceback (most recent call last):
+  File "{project_root}/src/main.py", line 100, in process_question
+    response = self.client.chat.completions.create(
+  File "/Users/esteb/dev/maister/henry_bot_M1/venv/lib/python3.13/site-packages/openai/_client.py", line 42, in create
+    return self.request()
+  File "{project_root}/src/logging_mod/logger.py", line 168, in log_error
+    self._write_csv_row(self.errors_log, row)
+openai.BadRequestError: Error code: 400"""
+
+    # Log the error
+    logger.log_error(
+        error_type="BadRequestError",
+        error_message="Error code: 400",
+        model="test-model",
+        user_question="Test question",
+        stack_trace=stack_trace
+    )
+
+    # Read the logged error
+    errors_file = Path(temp_log_dir) / "errors.csv"
+    with open(errors_file, 'r') as f:
+        reader = csv.DictReader(f)
+        rows = list(reader)
+
+    assert len(rows) == 1
+    row = rows[0]
+
+    # Verify project paths are relative
+    assert './src/main.py' in row["stack_trace"]
+    assert './src/logging_mod/logger.py' in row["stack_trace"]
+
+    # Verify external paths are anonymized
+    assert '<external>/_client.py' in row["stack_trace"]
+
+    # Verify no absolute paths are exposed
+    assert str(project_root) not in row["stack_trace"]
+    assert '/Users/' not in row["stack_trace"]
+    assert 'venv' not in row["stack_trace"]

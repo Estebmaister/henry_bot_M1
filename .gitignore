@@ -26,3 +26,5 @@ venv/
 ENV/
 env/
 venv.bak/
+.claude/
+CLAUDE.md
